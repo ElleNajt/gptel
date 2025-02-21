@@ -86,10 +86,12 @@ REQUEST-DATA is the data to send, TOKEN is a unique identifier."
          (add-hook 'gptel-post-response-functions cleanup-fn)
          (list "--data-binary"
                (format "@%s" temp-filename))))
-     (when (not (string-empty-p gptel-proxy))
-       (list "--proxy" gptel-proxy
-             "--proxy-negotiate"
-             "--proxy-user" ":"))
+     (when (or (not (string-empty-p gptel-proxy)) gptel-noproxy)
+       (append
+        (list "--proxy" gptel-proxy)
+        (when gptel-noproxy
+          (list "--noproxy" (if (eq gptel-noproxy 'empty) "" gptel-noproxy)))
+        (list "--proxy-negotiate" "--proxy-user" ":")))
      (cl-loop for (key . val) in headers
               collect (format "-H%s: %s" key val))
      (list url))))
